@@ -211,13 +211,16 @@ PAYMENT_DEBUG = True
 SMS_ACCESS_KEY_ID = '----------'
 SMS_ACCESS_KEY_SECRET = '----------'
 
-# SMS_APP = '23405490'
-# SMS_SECRET = 'fc4dde7fe3659364293bd830d334e3a4'
-# SMS_TEMPLATE_CODE = {'validate': 'SMS_12225993'}
-# SMS_SEND_INTERVAL = 60  # 短信发送时间间隔限制
-# SMS_EXPIRE_INTERVAL = 1800  # 验证码有效时间（秒）
-# SMS_SIGN_NAME = '短信签名'
-# SMS_DEBUG = True  # 不真正发送短信，将验证码直接返回
+SMS_SEND_INTERVAL = 60  # 短信发送时间间隔限制
+SMS_EXPIRE_INTERVAL = 1800
+SMS_SIGN_NAME = '短信签名'
+SMS_TEMPLATES = dict(
+    SIGN_IN='SMS_142655055',
+    CHANGE_PASSWORD='SMS_142655052',
+    CHANGE_MOBILE_VERIFY='SMS_142655051',
+    CHANGE_MOBILE_UPDATE='SMS_142655056',
+)
+SMS_DEBUG = False  # 不真正发送短信，将验证码直接返回
 
 # =============== JPUSH ==================
 
