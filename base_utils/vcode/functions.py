@@ -6,6 +6,8 @@ from time import time
 from django.conf import settings
 from django.core.exceptions import ValidationError
 
+from .setup_send import send_sms
+
 
 def sanitize_mobile(mobile):
     """ 过滤手机号码
@@ -15,7 +17,9 @@ def sanitize_mobile(mobile):
     :return:
     """
     mobile = mobile.strip()
-    assert re.match(r'^1[3-9]\d{9}$', mobile), '手机号码格式不正确'
+
+    from ..utils import is_valid_mobile
+    assert is_valid_mobile(mobile), '手机号码格式不正确'
     return mobile
 
 
@@ -102,8 +106,8 @@ def request_mobile_vcode(request, mobile, action=''):
     if not settings.SMS_DEBUG:
         sms_send(
             mobile,
-            settings.SMS_TEMPLATE_CODE.get('validate'),
-            dict(code=vcode, product='注册'),
+            settings.SMS_TEMPLATES.get(action),
+            dict(code=vcode),
         )
 
     set_vcode_info(request, mobile, vcode, action)
@@ -111,35 +115,16 @@ def request_mobile_vcode(request, mobile, action=''):
 
 
 def sms_send(mobile, template_code, params):
+    import uuid
     mobile = sanitize_mobile(mobile)
+    __business_id = uuid.uuid1()
 
-    from .alidayu import AlibabaAliqinFcSmsNumSendRequest
-
-    # 发送手机短信
-    req = AlibabaAliqinFcSmsNumSendRequest(
-        settings.SMS_APPKEY,
-        settings.SMS_SECRET
-    )
-
-    # req.extend = '123456'
-    req.sms_type = "normal"
-    req.sms_free_sign_name = settings.SMS_SIGN_NAME
-    req.sms_param = json.dumps(params)
-    req.rec_num = mobile
-    req.sms_template_code = template_code
+    if type(params) != str:
+        params = json.dumps(params)
 
     # 检验发送成功与否并返回 True，失败的话抛一个错误
-    try:
-        resp = req.getResponse()
-        if resp.get('error_response'):
-            raise ValidationError(
-                resp.get('error_response').get('msg'))
-        return resp
-    except Exception as e:
-        raise ValidationError('短信发送过于频繁，请稍后再试。')
-        # try:
-        #     resp = req.getResponse()
-        #     request.session['vcode'] = vcode
-        #     print(resp)
-        # except Exception as e:
-        #     print(e)
+    data = send_sms(__business_id, mobile, settings.SMS_SIGN_NAME, template_code, params)
+    resp = json.loads(data.decode())
+    if resp.get('Message') != 'OK':
+        raise ValidationError(data)
+    return resp

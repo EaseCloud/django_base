@@ -208,13 +208,16 @@ PAYMENT_DEBUG = True
 
 # =============== SMS Config ===================
 
-SMS_APPKEY = '23405490'
-SMS_SECRET = 'fc4dde7fe3659364293bd830d334e3a4'
-SMS_TEMPLATE_CODE = {'validate': 'SMS_12225993'}
-SMS_SEND_INTERVAL = 10  # 短信发送时间间隔限制
-SMS_EXPIRE_INTERVAL = 1800
-SMS_SIGN_NAME = '注册验证'
-SMS_DEBUG = True  # 不真正发送短信，将验证码直接返回
+SMS_ACCESS_KEY_ID = '----------'
+SMS_ACCESS_KEY_SECRET = '----------'
+
+# SMS_APP = '23405490'
+# SMS_SECRET = 'fc4dde7fe3659364293bd830d334e3a4'
+# SMS_TEMPLATE_CODE = {'validate': 'SMS_12225993'}
+# SMS_SEND_INTERVAL = 60  # 短信发送时间间隔限制
+# SMS_EXPIRE_INTERVAL = 1800  # 验证码有效时间（秒）
+# SMS_SIGN_NAME = '短信签名'
+# SMS_DEBUG = True  # 不真正发送短信，将验证码直接返回
 
 # =============== JPUSH ==================
 
@@ -229,9 +232,7 @@ ENABLE_ADMIN_SITE = True
 # ============== CUSTOM SESSION HEADER ==============
 CUSTOM_SESSION_HEADER = 'SESSION-ID'
 
-
 # ============== MethodOverrideMiddleware =================
 METHOD_OVERRIDE_ALLOWED_HTTP_METHODS = ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'PATCH']
 METHOD_OVERRIDE_PARAM_KEY = '_method'
 METHOD_OVERRIDE_HTTP_HEADER = 'HTTP_X_HTTP_METHOD_OVERRIDE'
-

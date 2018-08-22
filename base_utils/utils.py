@@ -1,6 +1,6 @@
 """ TODO: 待整理
 """
-
+import re
 from base64 import b64decode, b64encode
 from calendar import monthrange
 from datetime import datetime
@@ -111,6 +111,12 @@ def earth_distance(lat1, lng1, lat2, lng2):
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
+
+
+def is_valid_mobile(mobile):
+    """ 返回是否有效的手机号码格式 """
+    # https://blog.csdn.net/voidmain_123/article/details/78962164
+    return bool(re.match(r'^(?:13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$', mobile))
 
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
