@@ -153,3 +153,74 @@ class UserOption(models.Model):
         opt, created = cls.objects.get_or_create(key=key, user=user)
         opt.value = val
         opt.save()
+
+
+class Version(models.Model):
+    version = models.CharField(
+        verbose_name='版本号',
+        max_length=20,
+    )
+
+    alias = models.CharField(
+        verbose_name='版本别名',
+        max_length=100,
+        blank=True,
+        default='',
+    )
+
+    platform = models.CharField(
+        verbose_name='平台',
+        max_length=20,
+        blank=True,
+        default='',
+    )
+
+    date_created = models.DateTimeField(
+        verbose_name='创建时间',
+        auto_now_add=True,
+    )
+
+    date_updated = models.DateTimeField(
+        verbose_name='更新时间',
+        auto_now=True,
+    )
+
+    is_active = models.BooleanField(
+        verbose_name='是否可用',
+        default=True,
+    )
+
+    is_master = models.BooleanField(
+        verbose_name='是否主要版本',
+        default=True,
+        help_text='建议实践：如果是主要版本，所有低版本的客户端必须要升级到此版本才能使用，'
+                  '否则为建议版本，只作提醒，不强制升级。',
+    )
+
+    description = models.TextField(
+        verbose_name='版本描述',
+        blank=True,
+        default='',
+    )
+
+    link = models.CharField(
+        verbose_name='下载链接',
+        max_length=255,
+        blank=True,
+        default='',
+    )
+
+    attachment = models.OneToOneField(
+        verbose_name='安装包附件',
+        to='base_media.Attachment',
+        related_name='version',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        verbose_name = '版本'
+        verbose_name_plural = '版本'
+        db_table = 'base_version'
+        unique_together = ''
