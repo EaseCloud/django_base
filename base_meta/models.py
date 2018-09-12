@@ -17,7 +17,7 @@ from django.db import models
 class SortableModel(models.Model):
     """ 可排序模型
     """
-    sorting = models.IntegerField(
+    sorting = models.BigIntegerField(
         verbose_name='排序',
         default=0,
         help_text='用于系统进行排序的参数，可以给用户设定或者作为计算列存储组合权重',
