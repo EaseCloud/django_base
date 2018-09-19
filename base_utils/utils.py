@@ -118,6 +118,22 @@ def is_valid_mobile(mobile):
     # https://blog.csdn.net/voidmain_123/article/details/78962164
     return bool(re.match(r'^(?:13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$', mobile))
 
+
+def get_district_names(district):
+    import json
+    import os.path
+    area_data = json.load(open(
+        os.path.join(os.path.dirname(__file__), 'data/china-area-data.json')))
+    area_map = {}
+    for sub in area_data.values():
+        area_map.update(sub)
+    result = []
+    district = int(district)
+    while district and area_map.get((str(district) + "000000")[:6]):
+        result.insert(0, area_map.get((str(district) + "000000")[:6]))
+        district //= 100
+    return result
+
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
 #         """Raised for invalid block sizes"""
