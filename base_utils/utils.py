@@ -12,6 +12,20 @@ from django.conf import settings
 from django.http import JsonResponse
 
 
+def get_client_ip(request=None):
+    if not request:
+        from django_base.base_utils.middleware import get_request
+        request = get_request()
+    if not request:
+        return None
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
 def rsa_sign(text):
     key = RSA.importKey(b64decode(settings.ALIPAY_RSA_PRIVATE))
     h = SHA.new(text.encode())
