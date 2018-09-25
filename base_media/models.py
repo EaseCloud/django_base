@@ -29,29 +29,6 @@ class AbstractAttachment(models.Model):
         file_field = getattr(self, self.FILE_FIELD_NAME)
         return file_field.url if file_field else self.ext_url
 
-    @classmethod
-    def from_file(cls, file):
-        """ TODO: 工厂方法
-        根据提交的 file 构造一个对象
-        如果存在相同的 md5sum
-        :return:
-        """
-
-    @classmethod
-    def from_url_reference(cls, url):
-        """ 工厂方法
-        根据指定的 url 生成一个引用的 Attachment 对象
-        :return:
-        """
-        return cls.objects.create(ext_url=url, name=url.split('/')[-1])
-
-    @classmethod
-    def from_url_download(cls, url):
-        """ TODO: 工厂方法
-        根据指定的 url 下载图片保存，生成一个对象
-        :return:
-        """
-
     def save(self, *args, **kwargs):
         file_field = getattr(self, self.FILE_FIELD_NAME)
         if not self.name and file_field:
@@ -79,6 +56,49 @@ class Image(AbstractAttachment,
         verbose_name = '图片'
         verbose_name_plural = '图片'
         db_table = 'base_media_image'
+
+    def set_file_path(self, path):
+        from django.core.files import File
+        import os.path
+        self.image.save(os.path.basename(path), File(open(path, 'rb')))
+        self.save()
+
+    @classmethod
+    def from_file_path(cls, path):
+        """ 工厂方法
+        根据服务器本地文件路径构造一个对象
+        :return:
+        """
+        from django.core.files import File
+        import os.path
+        obj = cls()
+        obj.image.save(os.path.basename(path), File(open(path, 'rb')))
+        obj.save()
+        # print(obj, obj.id)
+        return obj
+
+    @classmethod
+    def from_file(cls, file):
+        """ TODO: 工厂方法
+        根据提交的 file 构造一个对象
+        如果存在相同的 md5sum
+        :return:
+        """
+
+    @classmethod
+    def from_url_reference(cls, url):
+        """ 工厂方法
+        根据指定的 url 生成一个引用的 Attachment 对象
+        :return:
+        """
+        return cls.objects.create(ext_url=url, name=url.split('/')[-1])
+
+    @classmethod
+    def from_url_download(cls, url):
+        """ TODO: 工厂方法
+        根据指定的 url 下载图片保存，生成一个对象
+        :return:
+        """
 
 
 class GalleryModel(models.Model):
