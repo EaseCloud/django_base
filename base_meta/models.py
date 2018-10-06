@@ -132,6 +132,15 @@ class HierarchicalModel(models.Model):
     class Meta:
         abstract = True
 
+    def clean(self):
+        # 环路检测
+        p = self.parent
+        while p is not None:
+            if p.id == self.id:
+                from django.core.exceptions import ValidationError
+                raise ValidationError('级联结构不能出现循环引用')
+            p = p.parent
+
 
 class UserOwnedModel(models.Model):
     """ 由用户拥有的模型类
