@@ -199,7 +199,7 @@ NORMALIZE_AUDIO = True
 CORS_ORIGIN_REGEX_WHITELIST = r'.*'
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ['null', '.local']
+CSRF_TRUSTED_ORIGINS = ['null', '.local', 'localhost', '127.0.0.1']
 
 # ============== Payment ===============
 
