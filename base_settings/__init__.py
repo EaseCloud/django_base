@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_cron',
     'django_filters',
+    'django_cleanup',
     # 'reversion',
 ]
 
