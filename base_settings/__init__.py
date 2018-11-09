@@ -13,6 +13,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# SECURE_PROXY_SSL_HEADER = ('HTTP_X_REAL_IP', '127.0.0.1')
+
 # Application definition
 
 INSTALLED_APPS = [
