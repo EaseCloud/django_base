@@ -66,9 +66,6 @@ class FullMediaUrlMiddleware(MiddlewareMixin):
     def process_request(request):
         from django.conf import settings
         from urllib.parse import urljoin
-        print(settings.SECURE_PROXY_SSL_HEADER)
-        [print(k, v) for k, v in request.META.items() if k.startswith('HTTP_')]
-        print(request.scheme)
         settings.MEDIA_URL = \
             urljoin(request.get_raw_uri(), settings.MEDIA_URL)
         settings.STATIC_URL = \
