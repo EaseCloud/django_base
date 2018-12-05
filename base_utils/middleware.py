@@ -85,7 +85,6 @@ class FullMediaUrlMiddleware(MiddlewareMixin):
 
 class ExplicitSessionMiddleware(MiddlewareMixin):
     def __init__(self, get_response=None):
-        print()
         super().__init__(get_response)
         from importlib import import_module
         self.get_response = get_response
@@ -114,6 +113,7 @@ class ExplicitSessionMiddleware(MiddlewareMixin):
 
 class MethodOverrideMiddleware(MiddlewareMixin):
     """
+    用于支持客户端 PATCH 方法受限时，采取 POST 方法，但是添加一个 Header 来实现 PATCH 提交的功能
     Clone from https://pypi.org/project/django-method-override/
     To solve android volley request patch method no supported issue:
     https://stackoverflow.com/a/20221780/2544762
