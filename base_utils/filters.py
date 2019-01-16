@@ -51,9 +51,10 @@ class DeepFilterBackend(object):
         allowed_deep_params = getattr(view, 'allowed_deep_params', ())
 
         for key, val in request.query_params.items():
+
             if '__' not in key:
                 continue
-            if not re.match(r'^!?[A-Za-z_]+$', key):
+            if not re.match(r'^!?[A-Za-z0-9_]+$', key):
                 continue
             exclude = key[0] == '!'
             key = key.strip('!')
