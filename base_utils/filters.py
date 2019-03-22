@@ -1,6 +1,8 @@
 import re
 import sys
 
+from django.conf import settings
+
 try:
     import coreapi
 except ImportError:
@@ -59,7 +61,8 @@ class DeepFilterBackend(object):
             exclude = key[0] == '!'
             key = key.strip('!')
             # 管理员登录可以豁免，否则所有的级联搜索必须显式放行
-            if not request.user.is_superuser and key not in allowed_deep_params:
+            if not (hasattr(settings, 'ALLOW_ALL_DEEP_PARAMS') and settings.ALLOW_ALL_DEEP_PARAMS) \
+                    and not request.user.is_superuser and key not in allowed_deep_params:
                 print(
                     '!!!! Deep filter param not registered: ' + key + '\n' +
                     'The param is skipped, to make it work, '
