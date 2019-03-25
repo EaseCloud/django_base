@@ -161,10 +161,11 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         # 'rest_framework_filters.backends.DjangoFilterBackend',
         'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
+        # 'rest_framework.filters.OrderingFilter',
         # 'core.filters.RelatedOrderingFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
         'django_base.base_utils.filters.DeepFilterBackend',
+        'django_base.base_utils.filters.OrderingFilter',
     ),
     # 'DEFAULT_RENDERER_CLASSES': (
     #     # 'rest_framework.renderers.JSONRenderer',
