@@ -13,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework.compat import coreapi, coreschema
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.settings import api_settings
+from django.db.models import Q
 
 try:
     import coreapi
@@ -60,41 +61,82 @@ class DeepFilterBackend(object):
     TODO: 考虑添加静默选项以防止生产环境过多输出警告参数
     """
 
+    request = None
+    allowed_deep_params = []
+
+    @staticmethod
+    def never():
+        return Q(pk=None)
+
+    @staticmethod
+    def always():
+        return ~Q(pk=None)
+
+    @staticmethod
+    def get_setting_value(key, default):
+        if not hasattr(settings, key):
+            return default
+        return getattr(settings, key)
+
+    def malformed_query(self):
+        # 配置 ALLOW_MALFORMED_QUERY = False 以实现非授权条件断路（返回空集）
+        return self.always() if self.get_setting_value('ALLOW_MALFORMED_QUERY', True) else self.never()
+
     def filter_queryset(self, request, queryset, view):
-        allowed_deep_params = getattr(view, 'allowed_deep_params', ())
+        self.request = request
+        self.allowed_deep_params = getattr(view, 'allowed_deep_params', ())
 
         for key, val in request.query_params.items():
-
-            if '__' not in key:
-                continue
-            if not re.match(r'^!?[A-Za-z0-9_]+$', key):
-                continue
-            exclude = key[0] == '!'
-            key = key.strip('!')
-            # 管理员登录可以豁免，否则所有的级联搜索必须显式放行
-            if not (hasattr(settings, 'ALLOW_ALL_DEEP_PARAMS') and settings.ALLOW_ALL_DEEP_PARAMS) \
-                    and not request.user.is_superuser and key not in allowed_deep_params:
-                print(
-                    '!!!! Deep filter param not registered: ' + key + '\n' +
-                    'The param is skipped, to make it work, '
-                    'add the params key name to `allowed_deep_params` list '
-                    'in the View class.\n!!!!', file=sys.stderr)
-                continue
-            if val == 'False':
-                val = False
-            elif val == 'True':
-                val = True
-            elif val == 'None':
-                val = None
-            # 如果是 id 列表类的入参，按照逗号进行分割
-            if key.endswith('__in') and re.match('^(?:\d+,)*\d+$', val):
-                val = map(int, val.split(','))
-            if exclude:
-                queryset = queryset.exclude(**{key: val})
-            else:
-                queryset = queryset.filter(**{key: val})
+            if '__' in key:
+                queryset = queryset.filter(self.get_single_condition_query(key, val))
+            if key.startswith('_complex_query'):
+                queryset = queryset.filter(self.parse_complex_query(val))
 
         return queryset
+
+    def get_single_condition_query(self, key, val):
+        # 不满足的条件设置为条件短路
+        if not re.match(r'^!*[A-Za-z0-9_]+$', key):
+            print('!!!! Unsupported query phase: {}={}'.format(key, val), file=sys.stderr)
+            return self.malformed_query()
+        if key[0] == '!':
+            return ~self.get_single_condition_query(key[1:], val)
+        # 管理员登录可以豁免，否则所有的级联搜索必须显式放行
+        if not self.get_setting_value('ALLOW_ALL_DEEP_PARAMS', False) \
+                and not self.request.user.is_superuser \
+                and key not in self.allowed_deep_params:
+            print(
+                '!!!! Deep filter param not registered: ' + key + '\n' +
+                'The param is skipped, to make it work, '
+                'add the params key name to `allowed_deep_params` list '
+                'in the View class.\n!!!!', file=sys.stderr)
+            return self.malformed_query()
+        # 特殊字符串值映射
+        value_mapper = {'False': False, 'True': True, 'None': None}
+        val = value_mapper[val] if val in value_mapper else val
+        # 如果是 id 列表类的入参，按照逗号进行分割
+        if key.endswith('__in') and re.match('^(?:\d+,)*\d+$', val):
+            val = map(int, val.split(','))
+        # 返回展开的条件
+        return Q(**{key: val})
+
+    def parse_complex_query(self, query):
+        if '||' in query:
+            q = self.never()
+            for part in query.split('||'):
+                q |= self.parse_complex_query(part)
+            return q
+        elif '&&' in query:
+            q = self.always()
+            for part in query.split('&&'):
+                q &= self.parse_complex_query(part)
+            return q
+        else:
+            tup = query.split('=')
+            if len(tup) != 2:
+                print('!!!! Unsupported query phase: {}'.format(query), file=sys.stderr)
+                return self.malformed_query()
+            return self.get_single_condition_query(*tup)  # tup=(key,val)
 
     def get_schema_fields(self, view):
         # This is not compatible with widgets where the query param differs from the
@@ -145,11 +187,11 @@ class OrderingFilter(BaseFilterBackend):
         # No ordering was included, or all the ordering fields were invalid
         return self.get_default_ordering(view)
 
-    # def get_default_ordering(self, view):
-    #     ordering = getattr(view, 'ordering', None)
-    #     if isinstance(ordering, six.string_types):
-    #         return (ordering,)
-    #     return ordering
+    def get_default_ordering(self, view):
+        ordering = getattr(view, 'ordering', None)
+        if isinstance(ordering, six.string_types):
+            return (ordering,)
+        return ordering
 
     # def get_default_valid_fields(self, queryset, view, context={}):
     #     # If `ordering_fields` is not specified, then we determine a default
