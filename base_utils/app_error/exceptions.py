@@ -8,6 +8,7 @@ class AppError(ValidationError):
     data = None
     http_status = None
     silent = False
+    debug = False
 
     def __init__(self, code, message, *, data=None, http_status=400, silent=False):
         super().__init__(message, code)
@@ -22,3 +23,8 @@ class AppError(ValidationError):
     def set_silent(self, silent):
         self.silent = silent
         return self
+
+    def set_debug(self, debug):
+        self.debug = debug
+        return self
+
