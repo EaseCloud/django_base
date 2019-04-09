@@ -10,11 +10,12 @@ class AppError(ValidationError):
     silent = False
     debug = False
 
-    def __init__(self, code, message, *, data=None, http_status=400, silent=False):
+    def __init__(self, code, message, *, data=None, http_status=400, silent=False, debug=False):
         super().__init__(message, code)
         self.data = data
         self.http_status = http_status
         self.silent = silent
+        self.debug = debug
 
     def set_data(self, data):
         self.data = data
