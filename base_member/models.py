@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django_base.base_meta.models import *
 
 
@@ -30,13 +32,6 @@ class AbstractMember(EntityModel):
         default='',
     )
 
-    nickname_pinyin = models.CharField(
-        verbose_name='昵称拼音',
-        max_length=255,
-        blank=True,
-        default='',
-    )
-
     gender = models.CharField(
         verbose_name='性别',
         max_length=1,
@@ -56,6 +51,8 @@ class AbstractMember(EntityModel):
         verbose_name='手机号码',
         max_length=45,
         unique=True,
+        null=True,
+        blank=True,
         # base_validator=base_validator.validate_mobile,
     )
 
@@ -114,6 +111,108 @@ class AbstractMember(EntityModel):
         help_text='用于区分单用例登录',
     )
 
+    class Meta:
+        abstract = True
+
+    def __str__(self):
+        return '{}:{}'.format(self.mobile, self.nickname)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # 将用户名和 is_active 同步到 User
+        # 更换绑定手机要用到
+        # self.user.username = self.mobile
+        # self.user.is_active = self.is_active
+        # self.user.save()
+
+    def delete(self, *args, **kwargs):
+        """ 删除的时候要连带删除 User 对象
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.user.delete()
+        return super().delete(*args, **kwargs)
+
+    # def get_age(self):
+    #     import time
+    #     today = time.gmtime()
+    #     dy = 0
+    #     if self.age:
+    #         return self.age
+    #     if self.birthday:
+    #         birthday = self.birthday
+    #         dd = today[2] - birthday.day
+    #         dm = today[1] - birthday.month
+    #         dy = today[0] - birthday.year
+    #         if dd < 0:
+    #             dd = dd + 30
+    #             dm = dm - 1
+    #             if dm < 0:
+    #                 dm = dm + 12
+    #                 dy = dy - 1
+    #         if dm < 0:
+    #             dm = dm + 12
+    #             dy = dy - 1
+    #         return dy.__str__()
+    #     return None
+
+
+# class MemberAddress(UserOwnedModel,
+#                     EntityModel):
+#     """ 会员地址，可以用于收货地址等用途
+#     """
+#     # district = models.ForeignKey(
+#     #     verbose_name='地区',
+#     #     to='AddressDistrict',
+#     #     on_delete=models.PROTECT,
+#     #     related_name='addresses',
+#     # )
+#
+#     content = models.CharField(
+#         verbose_name='详细地址',
+#         max_length=255,
+#     )
+#
+#     receiver = models.CharField(
+#         verbose_name='收件人',
+#         max_length=50,
+#     )
+#
+#     mobile = models.CharField(
+#         verbose_name='联系电话',
+#         max_length=20,
+#     )
+#
+#     is_default = models.BooleanField(
+#         verbose_name='是否默认',
+#         default=False,
+#     )
+#
+#     class Meta:
+#         verbose_name = '地址'
+#         verbose_name_plural = '地址'
+#         db_table = 'member_address'
+
+class MemberPinyinMixin(models.Model):
+    nickname_pinyin = models.CharField(
+        verbose_name='昵称拼音',
+        max_length=255,
+        blank=True,
+        default='',
+    )
+
+    class Meta:
+        abstract = True
+
+    def save(self, *args, **kwargs):
+        # 生成昵称的拼音
+        from uuslug import slugify
+        self.nickname_pinyin = slugify(self.nickname)
+        super().save(*args, **kwargs)
+
+
+class MemberConstellationMixin(models.Model):
     CONSTELLATION_ARIES = 'ARIES'
     CONSTELLATION_TAURUS = 'TAURUS'
     CONSTELLATION_GEMINI = 'GEMINI'
@@ -153,172 +252,109 @@ class AbstractMember(EntityModel):
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return '{}:{}'.format(self.mobile, self.nickname)
-
     def save(self, *args, **kwargs):
-        # 生成昵称的拼音
-        from uuslug import slugify
-        self.nickname_pinyin = slugify(self.nickname)
         # 如果输入了生日日期，直接确定星座
-        # if not self.birthday:
-        #     self.birthday = datetime.now()
-        # if self.birthday:
-        #     date_str = self.birthday.strftime('%m%d')
-        #     if date_str < '0120':  # 摩羯座
-        #         self.constellation = self.CONSTELLATION_CAPRICORN
-        #     elif date_str < '0219':  # 水瓶座
-        #         self.constellation = self.CONSTELLATION_AQUARIUS
-        #     elif date_str < '0321':  # 双鱼座
-        #         self.constellation = self.CONSTELLATION_PISCES
-        #     elif date_str < '0420':  # 白羊座
-        #         self.constellation = self.CONSTELLATION_ARIES
-        #     elif date_str < '0521':  # 金牛座
-        #         self.constellation = self.CONSTELLATION_TAURUS
-        #     elif date_str < '0622':  # 双子座
-        #         self.constellation = self.CONSTELLATION_GEMINI
-        #     elif date_str < '0723':  # 巨蟹座
-        #         self.constellation = self.CONSTELLATION_CANCER
-        #     elif date_str < '0823':  # 狮子座
-        #         self.constellation = self.CONSTELLATION_LEO
-        #     elif date_str < '0923':  # 处女座
-        #         self.constellation = self.CONSTELLATION_VIRGO
-        #     elif date_str < '1024':  # 天秤座
-        #         self.constellation = self.CONSTELLATION_LIBRA
-        #     elif date_str < '1123':  # 天蝎座
-        #         self.constellation = self.CONSTELLATION_SCORPIO
-        #     elif date_str < '1222':  # 射手座
-        #         self.constellation = self.CONSTELLATION_SAGITTARIUS
-        #     else:  # 摩羯座
-        #         self.constellation = self.CONSTELLATION_CAPRICORN
-        super(EntityModel, self).save(*args, **kwargs)
-        # 将用户名和 is_active 同步到 User
-        # 更换绑定手机要用到
-        # self.user.username = self.mobile
-        # self.user.is_active = self.is_active
-        # self.user.save()
-
-    # def get_age(self):
-    #     import time
-    #     today = time.gmtime()
-    #     dy = 0
-    #     if self.age:
-    #         return self.age
-    #     if self.birthday:
-    #         birthday = self.birthday
-    #         dd = today[2] - birthday.day
-    #         dm = today[1] - birthday.month
-    #         dy = today[0] - birthday.year
-    #         if dd < 0:
-    #             dd = dd + 30
-    #             dm = dm - 1
-    #             if dm < 0:
-    #                 dm = dm + 12
-    #                 dy = dy - 1
-    #         if dm < 0:
-    #             dm = dm + 12
-    #             dy = dy - 1
-    #         return dy.__str__()
-    #     return None
-
-# class MemberAddress(UserOwnedModel,
-#                     EntityModel):
-#     """ 会员地址，可以用于收货地址等用途
-#     """
-#     # district = models.ForeignKey(
-#     #     verbose_name='地区',
-#     #     to='AddressDistrict',
-#     #     on_delete=models.PROTECT,
-#     #     related_name='addresses',
-#     # )
-#
-#     content = models.CharField(
-#         verbose_name='详细地址',
-#         max_length=255,
-#     )
-#
-#     receiver = models.CharField(
-#         verbose_name='收件人',
-#         max_length=50,
-#     )
-#
-#     mobile = models.CharField(
-#         verbose_name='联系电话',
-#         max_length=20,
-#     )
-#
-#     is_default = models.BooleanField(
-#         verbose_name='是否默认',
-#         default=False,
-#     )
-#
-#     class Meta:
-#         verbose_name = '地址'
-#         verbose_name_plural = '地址'
-#         db_table = 'member_address'
+        if not self.birthday:
+            self.birthday = datetime.now()
+        if self.birthday:
+            date_str = self.birthday.strftime('%m%d')
+            if date_str < '0120':  # 摩羯座
+                self.constellation = self.CONSTELLATION_CAPRICORN
+            elif date_str < '0219':  # 水瓶座
+                self.constellation = self.CONSTELLATION_AQUARIUS
+            elif date_str < '0321':  # 双鱼座
+                self.constellation = self.CONSTELLATION_PISCES
+            elif date_str < '0420':  # 白羊座
+                self.constellation = self.CONSTELLATION_ARIES
+            elif date_str < '0521':  # 金牛座
+                self.constellation = self.CONSTELLATION_TAURUS
+            elif date_str < '0622':  # 双子座
+                self.constellation = self.CONSTELLATION_GEMINI
+            elif date_str < '0723':  # 巨蟹座
+                self.constellation = self.CONSTELLATION_CANCER
+            elif date_str < '0823':  # 狮子座
+                self.constellation = self.CONSTELLATION_LEO
+            elif date_str < '0923':  # 处女座
+                self.constellation = self.CONSTELLATION_VIRGO
+            elif date_str < '1024':  # 天秤座
+                self.constellation = self.CONSTELLATION_LIBRA
+            elif date_str < '1123':  # 天蝎座
+                self.constellation = self.CONSTELLATION_SCORPIO
+            elif date_str < '1222':  # 射手座
+                self.constellation = self.CONSTELLATION_SAGITTARIUS
+            else:  # 摩羯座
+                self.constellation = self.CONSTELLATION_CAPRICORN
+        super().save(*args, **kwargs)
 
 
-# class OAuthEntry(UserOwnedModel):
-#     PLATFORM_WECHAT_APP = 'WECHAT_APP'
-#     PLATFORM_WECHAT_BIZ = 'WECHAT_BIZ'
-#     PLATFORM_ALIPAY = 'ALIPAY'
-#     PLATFORM_QQ = 'QQ'
-#     PLATFORM_WEIBO = 'WEIBO'
-#     PLATFORM_CHOICES = (
-#         (PLATFORM_WECHAT_APP, '微信APP'),
-#         (PLATFORM_WECHAT_BIZ, '微信公众平台'),
-#         (PLATFORM_ALIPAY, '支付宝'),
-#         (PLATFORM_QQ, 'QQ'),
-#         (PLATFORM_WEIBO, '微博'),
-#     )
-#
-#     platform = models.CharField(
-#         verbose_name='第三方平台',
-#         max_length=20,
-#         choices=PLATFORM_CHOICES,
-#         default='',
-#         blank=True,
-#     )
-#
-#     app = models.CharField(
-#         verbose_name='app',
-#         max_length=120,
-#         blank=True,
-#         default='',
-#     )
-#
-#     openid = models.CharField(
-#         verbose_name='用户OpenID',
-#         max_length=128,
-#     )
-#
-#     nickname = models.CharField(
-#         verbose_name='用户昵称',
-#         max_length=128,
-#         null=True,
-#     )
-#
-#     headimgurl = models.URLField(
-#         verbose_name='用户头像',
-#         blank=True,
-#         null=True,
-#     )
-#
-#     avatar = models.ImageField(
-#         verbose_name='头像文件',
-#         upload_to='oauth/avatar/',
-#         blank=True,
-#         null=True,
-#     )
-#
-#     params = models.TextField(
-#         verbose_name='params',
-#         blank=True,
-#         default=''
-#     )
-#
-#     class Meta:
-#         verbose_name = '第三方授权'
-#         verbose_name_plural = '第三方授权'
-#         db_table = 'member_oauth_entry'
-#         unique_together = [['app', 'openid']]
+class AbstractOAuthEntry(UserOwnedModel):
+    PLATFORM_WECHAT_APP = 'WECHAT_APP'
+    PLATFORM_WECHAT_BIZ = 'WECHAT_BIZ'
+    PLATFORM_ALIPAY = 'ALIPAY'
+    PLATFORM_QQ = 'QQ'
+    PLATFORM_WEIBO = 'WEIBO'
+    PLATFORM_CHOICES = (
+        (PLATFORM_WECHAT_APP, '微信APP'),
+        (PLATFORM_WECHAT_BIZ, '微信公众平台'),
+        (PLATFORM_ALIPAY, '支付宝'),
+        (PLATFORM_QQ, 'QQ'),
+        (PLATFORM_WEIBO, '微博'),
+    )
+
+    platform = models.CharField(
+        verbose_name='第三方平台',
+        max_length=20,
+        choices=PLATFORM_CHOICES,
+        default='',
+        blank=True,
+    )
+
+    app = models.CharField(
+        verbose_name='app',
+        max_length=120,
+        blank=True,
+        default='',
+    )
+
+    openid = models.CharField(
+        verbose_name='用户OpenID',
+        max_length=128,
+    )
+
+    unionid = models.CharField(
+        verbose_name='Union ID',
+        max_length=50,
+    )
+
+    nickname = models.CharField(
+        verbose_name='用户昵称',
+        max_length=128,
+        blank=True,
+        null=True,
+    )
+
+    headimgurl = models.URLField(
+        verbose_name='用户头像',
+        blank=True,
+        null=True,
+    )
+
+    avatar = models.ImageField(
+        verbose_name='头像文件',
+        upload_to='oauth/avatar/',
+        blank=True,
+        null=True,
+    )
+
+    params = models.TextField(
+        verbose_name='params',
+        blank=True,
+        default=''
+    )
+
+    class Meta:
+        abstract = True
+        verbose_name = '第三方授权'
+        verbose_name_plural = '第三方授权'
+        db_table = 'member_oauth_entry'
+        unique_together = [['app', 'openid']]

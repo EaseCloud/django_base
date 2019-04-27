@@ -104,20 +104,15 @@ DATABASES = {
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = [{
+    'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+}, {
+    'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+}, {
+    'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+}, {
+    'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+}]
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
@@ -160,12 +155,12 @@ REST_FRAMEWORK = {
     # ],
     'DEFAULT_FILTER_BACKENDS': (
         # 'rest_framework_filters.backends.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
+        # 'rest_framework.filters.SearchFilter',
         # 'rest_framework.filters.OrderingFilter',
-        # 'core.filters.RelatedOrderingFilter',
         'django_filters.rest_framework.DjangoFilterBackend',
         'django_base.base_utils.filters.DeepFilterBackend',
         'django_base.base_utils.filters.OrderingFilter',
+        'django_base.base_utils.filters.SearchFilter',
     ),
     # 'DEFAULT_RENDERER_CLASSES': (
     #     # 'rest_framework.renderers.JSONRenderer',
