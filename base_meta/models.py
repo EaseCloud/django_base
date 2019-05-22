@@ -242,7 +242,7 @@ class AbstractValidationModel(models.Model):
     class Meta:
         abstract = True
 
-    def approve(self):
+    def approve(self, *args, **kwargs):
         if self.status not in (self.STATUS_PENDING, self.STATUS_REJECTED):
             from django_base.base_utils.app_error.exceptions import AppError
             raise AppError('ERR091', '审批对象的状态必须为等待审批或者驳回')
@@ -250,7 +250,7 @@ class AbstractValidationModel(models.Model):
         self.date_response = datetime.now()
         self.save()
 
-    def reject(self, reason):
+    def reject(self, reason, *args, **kwargs):
         from django_base.base_utils.app_error.exceptions import AppError
         if self.status not in (self.STATUS_PENDING,):
             raise AppError('ERR092', '审批对象的状态必须为等待审批')
