@@ -1,25 +1,21 @@
 from __future__ import unicode_literals
 
+import operator
 import re
 import sys
-import operator
 from functools import reduce
 
 from django.conf import settings
 from django.db import models
-from django.core.exceptions import ImproperlyConfigured
+from django.db.models import Q
 from django.db.models.constants import LOOKUP_SEP
-from django.db.models.sql.constants import ORDER_PATTERN
 from django.template import loader
 from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
-from rest_framework.compat import coreapi, coreschema
+from rest_framework.compat import coreapi, coreschema, distinct
 from rest_framework.filters import BaseFilterBackend
 from rest_framework.settings import api_settings
-from django.db.models import Q
-
-from rest_framework.compat import coreapi, coreschema, distinct, guardian
 
 try:
     import coreapi
