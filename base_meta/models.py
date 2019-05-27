@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -126,7 +128,7 @@ class HierarchicalModel(models.Model):
         related_name='children',
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
@@ -239,6 +241,25 @@ class AbstractValidationModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def approve(self, *args, **kwargs):
+        if self.status not in (self.STATUS_PENDING, self.STATUS_REJECTED):
+            from django_base.base_utils.app_error.exceptions import AppError
+            raise AppError('ERR091', '审批对象的状态必须为等待审批或者驳回')
+        self.status = self.STATUS_SUCCESS
+        self.date_response = datetime.now()
+        self.save()
+
+    def reject(self, reason, *args, **kwargs):
+        from django_base.base_utils.app_error.exceptions import AppError
+        if self.status not in (self.STATUS_PENDING,):
+            raise AppError('ERR092', '审批对象的状态必须为等待审批')
+        if not reason:
+            raise AppError('ERR093', '请填写驳回理由')
+        self.status = self.STATUS_REJECTED
+        self.date_response = datetime.now()
+        self.remark = reason
+        self.save()
 
 
 class AbstractTransactionModel(models.Model):

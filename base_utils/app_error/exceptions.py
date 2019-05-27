@@ -25,6 +25,10 @@ class AppError(ValidationError):
         self.silent = silent
         return self
 
+    def set_message(self, message):
+        self.message = message
+        return self
+
     def set_debug(self, debug):
         self.debug = debug
         return self
