@@ -138,7 +138,7 @@ class HierarchicalModel(models.Model):
         # 环路检测
         p = self.parent
         while p is not None:
-            if p.id == self.id:
+            if p.pk == self.pk:
                 from django.core.exceptions import ValidationError
                 raise ValidationError('级联结构不能出现循环引用')
             p = p.parent
