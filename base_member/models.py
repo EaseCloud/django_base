@@ -287,7 +287,7 @@ class MemberConstellationMixin(models.Model):
         super().save(*args, **kwargs)
 
 
-class AbstractOAuthEntry(UserOwnedModel):
+class AbstractOAuthEntry(NullableUserOwnedModel):
     PLATFORM_WECHAT_APP = 'WECHAT_APP'
     PLATFORM_WECHAT_BIZ = 'WECHAT_BIZ'
     PLATFORM_ALIPAY = 'ALIPAY'

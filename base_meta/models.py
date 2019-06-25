@@ -144,7 +144,7 @@ class HierarchicalModel(models.Model):
             p = p.parent
 
 
-class UserOwnedModel(models.Model):
+class NullableUserOwnedModel(models.Model):
     """ 由用户拥有的模型类
     包含作者字段
     """
@@ -156,6 +156,22 @@ class UserOwnedModel(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class UserOwnedModel(models.Model):
+    """ 由用户拥有的模型类
+    包含作者字段，要求非空
+    """
+
+    author = models.ForeignKey(
+        verbose_name='作者',
+        to='auth.User',
+        related_name='%(class)ss_owned',
+        on_delete=models.PROTECT,
     )
 
     class Meta:
