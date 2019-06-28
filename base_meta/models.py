@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
@@ -126,7 +128,7 @@ class HierarchicalModel(models.Model):
         related_name='children',
         blank=True,
         null=True,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
     )
 
     class Meta:
@@ -136,13 +138,13 @@ class HierarchicalModel(models.Model):
         # 环路检测
         p = self.parent
         while p is not None:
-            if p.id == self.id:
+            if p.pk == self.pk:
                 from django.core.exceptions import ValidationError
                 raise ValidationError('级联结构不能出现循环引用')
             p = p.parent
 
 
-class UserOwnedModel(models.Model):
+class NullableUserOwnedModel(models.Model):
     """ 由用户拥有的模型类
     包含作者字段
     """
@@ -154,6 +156,22 @@ class UserOwnedModel(models.Model):
         blank=True,
         null=True,
         on_delete=models.SET_NULL,
+    )
+
+    class Meta:
+        abstract = True
+
+
+class UserOwnedModel(models.Model):
+    """ 由用户拥有的模型类
+    包含作者字段，要求非空
+    """
+
+    author = models.ForeignKey(
+        verbose_name='作者',
+        to='auth.User',
+        related_name='%(class)ss_owned',
+        on_delete=models.PROTECT,
     )
 
     class Meta:
@@ -239,6 +257,25 @@ class AbstractValidationModel(models.Model):
 
     class Meta:
         abstract = True
+
+    def approve(self, *args, **kwargs):
+        if self.status not in (self.STATUS_PENDING, self.STATUS_REJECTED):
+            from django_base.base_utils.app_error.exceptions import AppError
+            raise AppError('ERR091', '审批对象的状态必须为等待审批或者驳回')
+        self.status = self.STATUS_SUCCESS
+        self.date_response = datetime.now()
+        self.save()
+
+    def reject(self, reason, *args, **kwargs):
+        from django_base.base_utils.app_error.exceptions import AppError
+        if self.status not in (self.STATUS_PENDING,):
+            raise AppError('ERR092', '审批对象的状态必须为等待审批')
+        if not reason:
+            raise AppError('ERR093', '请填写驳回理由')
+        self.status = self.STATUS_REJECTED
+        self.date_response = datetime.now()
+        self.remark = reason
+        self.save()
 
 
 class AbstractTransactionModel(models.Model):
