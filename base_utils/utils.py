@@ -130,7 +130,8 @@ def earth_distance(lat1, lng1, lat2, lng2):
 def is_valid_mobile(mobile):
     """ 返回是否有效的手机号码格式 """
     # https://blog.csdn.net/voidmain_123/article/details/78962164
-    return bool(re.match(r'^(?:13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$', mobile))
+    # return bool(re.match(r'^(?:13[0-9]|14[579]|15[0-3,5-9]|16[6]|17[0135678]|18[0-9]|19[89])\d{8}$', mobile))
+    return bool(re.match(r'^1[3-9]\d{9}$', mobile))
 
 
 def get_district_names(district):
