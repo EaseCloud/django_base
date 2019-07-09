@@ -25,3 +25,10 @@ class OptionViewSet(viewsets.GenericViewSet):
     def set(self, request):
         m.Option.set(request.data.get('key'), request.data.get('value'))
         return u.response_success('设置成功', silent=True)
+
+
+class VersionViewSet(viewsets.ModelViewSet):
+    queryset = m.Version.objects.all()
+    serializer_class = s.VersionSerializer
+    filter_fields = '__all__'
+    ordering = ['-pk']
