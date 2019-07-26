@@ -171,7 +171,7 @@ class UserOwnedModel(models.Model):
         verbose_name='作者',
         to='auth.User',
         related_name='%(class)ss_owned',
-        on_delete=models.PROTECT,
+        on_delete=models.CASCADE,
     )
 
     class Meta:
