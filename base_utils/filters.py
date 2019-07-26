@@ -88,6 +88,10 @@ class DeepFilterBackend(object):
         self.request = request
         self.allowed_deep_params = getattr(view, 'allowed_deep_params', ())
 
+        # 注意，这个只能在 list 方法中生效，其他方法不作篡改
+        if view.action != 'list':
+            return queryset
+
         for key, val in request.query_params.items():
             if '__' in key:
                 queryset = queryset.filter(self.get_single_condition_query(key, val))
