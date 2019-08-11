@@ -74,6 +74,11 @@ def response_fail(msg='', errcode=0, *, status=400, data=None, silent=False):
 #     assert len(password) >= 6, '密码长度不得低于 6 位'
 #     return password
 
+def camel2underscore(name):
+    # https://stackoverflow.com/a/1176023/2544762
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
 
 def normalize_date(dt):
     return datetime.strptime(dt, '%Y-%m-%d') if type(dt) == str else dt
