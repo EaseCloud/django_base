@@ -143,6 +143,10 @@ class HierarchicalModel(models.Model):
                 raise ValidationError('级联结构不能出现循环引用')
             p = p.parent
 
+    @property
+    def parent_name(self):
+        return self.parent and self.parent.name
+
 
 class NullableUserOwnedModel(models.Model):
     """ 由用户拥有的模型类

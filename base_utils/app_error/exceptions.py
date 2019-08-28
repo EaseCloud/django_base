@@ -33,3 +33,6 @@ class AppError(ValidationError):
         self.debug = debug
         return self
 
+    def set_status_code(self, status_code):
+        self.http_status = status_code
+        return self

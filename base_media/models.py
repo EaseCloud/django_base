@@ -101,6 +101,43 @@ class Image(AbstractAttachment,
         """
 
 
+class Video(AbstractAttachment,
+            models.Model):
+    """ 视频对象
+    """
+
+    video = models.FileField(
+        verbose_name='视频',
+        upload_to='video/'
+    )
+
+    class Meta:
+        verbose_name = '视频'
+        verbose_name_plural = '视频'
+        db_table = 'base_media_video'
+
+
+class Audio(AbstractAttachment,
+            models.Model):
+    """ 音频对象
+    """
+
+    audio = models.FileField(
+        verbose_name='音频',
+        upload_to='audio/'
+    )
+
+    is_active = models.BooleanField(
+        verbose_name='是否可用',
+        default=True,
+    )
+
+    class Meta:
+        verbose_name = '音频'
+        verbose_name_plural = '音频'
+        db_table = 'base_media_audio'
+
+
 class GalleryModel(models.Model):
     images = models.ManyToManyField(
         verbose_name='图片',

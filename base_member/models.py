@@ -162,12 +162,11 @@ class AbstractMember(EntityModel):
 #                     EntityModel):
 #     """ 会员地址，可以用于收货地址等用途
 #     """
-#     # district = models.ForeignKey(
-#     #     verbose_name='地区',
-#     #     to='AddressDistrict',
-#     #     on_delete=models.PROTECT,
-#     #     related_name='addresses',
-#     # )
+#     district = models.CharField(
+#         verbose_name='地区',
+#         max_length=20,
+#         help_text='行政区划编号',
+#     )
 #
 #     content = models.CharField(
 #         verbose_name='详细地址',
