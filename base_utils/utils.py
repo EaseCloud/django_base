@@ -154,6 +154,28 @@ def get_district_names(district):
         district //= 100
     return result
 
+
+def wrap_choices(choices, value, default_value=None):
+    for key, val in choices:
+        if value == key:
+            return val
+    return default_value
+
+
+def unwrap_choices(choices, value, default_value=None):
+    for key, val in choices:
+        if value == val:
+            return key
+    return default_value
+
+
+def parse_excel_date(dt, format='%Y-%m-%d'):
+    if not dt:
+        return None
+    elif type(dt) == int:
+        return datetime.fromordinal(datetime(1900, 1, 1).toordinal() + dt - 2)
+    return datetime.strptime(dt, format)
+
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
 #         """Raised for invalid block sizes"""
