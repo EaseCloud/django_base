@@ -148,11 +148,17 @@ def get_district_names(district):
     for sub in area_data.values():
         area_map.update(sub)
     result = []
+    if not re.match(r'^\d{6}$', district):
+        return district
     district = int(district)
     while district and area_map.get((str(district) + "000000")[:6]):
         result.insert(0, area_map.get((str(district) + "000000")[:6]))
         district //= 100
+    # import gb2260
+    # d = gb2260.get(district)
+    # ' '.join([x.name for x in d.stack()])
     return result
+
 
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
