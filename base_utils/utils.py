@@ -148,10 +148,15 @@ def get_district_names(district):
     for sub in area_data.values():
         area_map.update(sub)
     result = []
+    if not re.match(r'^\d{6}$', district):
+        return district
     district = int(district)
     while district and area_map.get((str(district) + "000000")[:6]):
         result.insert(0, area_map.get((str(district) + "000000")[:6]))
         district //= 100
+    # import gb2260
+    # d = gb2260.get(district)
+    # ' '.join([x.name for x in d.stack()])
     return result
 
 
@@ -163,6 +168,28 @@ def parse_choices(choices, delimiter='|'):
     if type(choices[0]) == str:
         return tuple((c, c) for c in choices)
     return choices
+
+
+def wrap_choices(choices, value, default_value=None):
+    for key, val in choices:
+        if value == key:
+            return val
+    return default_value
+
+
+def unwrap_choices(choices, value, default_value=None):
+    for key, val in choices:
+        if value == val:
+            return key
+    return default_value
+
+
+def parse_excel_date(dt, format='%Y-%m-%d'):
+    if not dt:
+        return None
+    elif type(dt) == int:
+        return datetime.fromordinal(datetime(1900, 1, 1).toordinal() + dt - 2)
+    return datetime.strptime(dt, format)
 
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
