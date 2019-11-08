@@ -154,6 +154,16 @@ def get_district_names(district):
         district //= 100
     return result
 
+
+def parse_choices(choices, delimiter='|'):
+    if not choices:
+        return ()
+    if type(choices) == str:
+        return parse_choices(choices=choices.split(delimiter))
+    if type(choices[0]) == str:
+        return tuple((c, c) for c in choices)
+    return choices
+
 # class AESCipher:
 #     class InvalidBlockSizeError(Exception):
 #         """Raised for invalid block sizes"""
