@@ -109,17 +109,28 @@ class GeoPositionedModel(models.Model):
         return self.latlng_baidu2qq(self.geo_lat, self.geo_lng)
 
     @staticmethod
-    def geo_decode(lat, lng):
-        """调用百度接口反解地理信息"""
+    def geo_decode(lat, lng, platform='BMAP'):
+        """ 调用百度接口反解地理信息
+        :param lat: 经度
+        :param lng: 纬度
+        :param platform: BAIDU/GAODE 百度/高德
+        :return:
+        """
         from urllib.request import urlopen
         try:
-            resp = urlopen(
-                'http://api.map.baidu.com/geocoder/v2/'
-                '?location={},{}&output=json&ak={}'.format(
-                    lat, lng, settings.BMAP_KEY
+            if platform == 'BMAP':
+                resp = urlopen(
+                    'http://api.map.baidu.com/geocoder/v2/'
+                    '?location={},{}&output=json&ak={}'.format(lat, lng, settings.BMAP_KEY)
                 )
-            )
-            return json.loads(resp.read().decode()).get('result')
+                return json.loads(resp.read().decode()).get('result')
+            elif platform == 'AMAP':
+                resp = urlopen(
+                    'https://restapi.amap.com/v3/geocode/regeo'
+                    '?key={key}&location={lng},{lat}'.format(lat=lat, lng=lng, key=settings.AMAP_KEY)
+                )
+                data = json.loads(resp.read().decode())
+                return data.get('regeocode')
         except:
             # 反解地理信息失败
             import traceback
@@ -127,8 +138,8 @@ class GeoPositionedModel(models.Model):
             print(traceback.format_exc(), file=stderr)
             return None
 
-    def get_geo_decode(self):
-        return self.geo_decode(self.geo_lat, self.geo_lng)
+    def get_geo_decode(self, platform='BMAP'):
+        return self.geo_decode(self.geo_lat, self.geo_lng, platform)
 
     def get_label(self):
         info = self.get_geo_decode()

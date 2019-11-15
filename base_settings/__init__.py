@@ -190,6 +190,8 @@ AUTO_GEO_DECODE = False
 
 # 百度地图 API_KEY
 BMAP_KEY = 'D373d23acd37b0c4af370a517922e020'
+# 高德地图 API_KEY
+AMAP_KEY = '426199200d02eb77b7758f87f394a2c9'
 
 # 是否将音频自动转换为 ogg/mp3
 NORMALIZE_AUDIO = True
