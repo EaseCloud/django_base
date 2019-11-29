@@ -99,6 +99,8 @@ class Image(AbstractAttachment,
         根据指定的 url 下载图片保存，生成一个对象
         :return:
         """
+        from django_base.base_utils.app_error.exceptions import AppError
+        raise AppError(99999, '尚未实现', debug=True)
 
 
 class Video(AbstractAttachment,

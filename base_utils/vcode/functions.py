@@ -1,12 +1,11 @@
 import json
 import re
 import random
+from functools import wraps
 from time import time
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-
-from .setup_send import send_sms
 
 
 def sanitize_mobile(mobile):
@@ -32,15 +31,14 @@ def validate_mobile_vcode(request, action, mobile, vcode):
     :return: 如果成功返回 True，失败返回 False
     """
 
+    from django_base.base_utils.app_error.exceptions import AppError
     _mobile, _vcode = get_vcode_info(request, action)
 
     if not vcode or vcode != _vcode:
-        # return response_fail('验证码不正确', '', 50001)
-        return False
+        raise AppError(50001, '验证码不正确', debug=False)
 
     if not mobile or mobile != _mobile:
-        # return response_fail('手机号码不一致', '', 50002)
-        return False
+        raise AppError(50002, '手机号码不一致', debug=False)
 
     # 验证成功马上擦除
     clear_vcode_info(request)
@@ -96,9 +94,13 @@ def request_mobile_vcode(request, mobile, action=''):
 
     # 一分钟内不允许重发
     if time() < last_sms_request_time + settings.SMS_SEND_INTERVAL:
-        raise ValidationError(
-            '您的操作过于频繁，请在 %d 秒后再试。'
-            % (last_sms_request_time + settings.SMS_SEND_INTERVAL - time()))
+        from django_base.base_utils.app_error.exceptions import AppError
+        raise AppError(
+            99999,
+            '您的操作过于频繁，请在 %d 秒后再试。' % (
+                    last_sms_request_time + settings.SMS_SEND_INTERVAL - time()),
+            debug=False
+        )
 
     vcode = '%06d' % (random.randint(0, 1000000))
 
@@ -123,8 +125,26 @@ def sms_send(mobile, template_code, params):
         params = json.dumps(params)
 
     # 检验发送成功与否并返回 True，失败的话抛一个错误
+    from .setup_send import send_sms
     data = send_sms(__business_id, mobile, settings.SMS_SIGN_NAME, template_code, params)
     resp = json.loads(data.decode())
     if resp.get('Message') != 'OK':
         raise ValidationError(data)
     return resp
+
+
+def vcode_required(action='', error=None, vcode_field='vcode', mobile_field='mobile'):
+    def func(view_func):
+        @wraps(view_func)
+        def _wrapped_view(self, request, *args, **kwargs):
+            vcode = request.data.get(vcode_field) or ''
+            mobile = request.data.get(mobile_field) or ''
+            result = validate_mobile_vcode(request, action, mobile, vcode)
+            if not result:
+                from django_base.base_utils.app_error.exceptions import AppError
+                raise error or AppError(99999, '验证码错误', debug=False)
+            return view_func(self, request, *args, **kwargs)
+
+        return _wrapped_view
+
+    return func
