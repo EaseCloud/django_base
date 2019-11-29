@@ -323,6 +323,7 @@ class AbstractOAuthEntry(NullableUserOwnedModel):
     unionid = models.CharField(
         verbose_name='Union ID',
         max_length=50,
+        blank=True,
     )
 
     nickname = models.CharField(
