@@ -47,7 +47,7 @@ def validate_mobile_vcode(request, action, mobile, vcode):
 
 
 def clear_vcode_info(request, action=''):
-    prefix = 'mobile_vcode_' + action
+    prefix = ('mobile_vcode_' + action).strip('_')
     for key in [prefix, prefix + '_number', prefix + '_time']:
         if key in request.session:
             del request.session[key]
@@ -55,7 +55,7 @@ def clear_vcode_info(request, action=''):
 
 
 def set_vcode_info(request, mobile, vcode, action=''):
-    prefix = 'mobile_vcode_' + action
+    prefix = ('mobile_vcode_' + action).strip('_')
     request.session[prefix + '_number'] = mobile
     request.session[prefix] = vcode
     request.session[prefix + '_time'] = int(time())
@@ -68,7 +68,7 @@ def get_vcode_info(request, action=''):
     :param action:
     :return:
     """
-    prefix = 'mobile_vcode_' + action
+    prefix = ('mobile_vcode_' + action).strip('_')
     # 上次请求验证码的时间
     last_sms_request_time = int(request.session.get(prefix + '_time', 0))
     # 验证码是否到期
