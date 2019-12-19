@@ -241,3 +241,13 @@ CUSTOM_SESSION_HEADER = 'SESSION-ID'
 METHOD_OVERRIDE_ALLOWED_HTTP_METHODS = ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'PATCH']
 METHOD_OVERRIDE_PARAM_KEY = '_method'
 METHOD_OVERRIDE_HTTP_HEADER = 'HTTP_X_HTTP_METHOD_OVERRIDE'
+
+# ============== DJANGO CACHE ===============
+# 为了解决 django-cron 的跨进程锁，需要换成 filebased cache
+# https://github.com/Tivix/django-cron/issues/41
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
+    }
+}
