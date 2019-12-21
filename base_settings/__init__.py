@@ -251,3 +251,5 @@ CACHES = {
         'LOCATION': '/var/tmp/django_cache',
     }
 }
+
+API_DEBUG = False
