@@ -63,8 +63,10 @@ class PlannedTaskBase(models.Model):
             self.status = self.STATUS_DONE
         except Exception as e:
             import traceback
+            from sys import stderr
             self.status = self.STATUS_FAIL
             self.traceback = traceback.format_exc()
+            print(traceback.format_exc(), file=stderr, flush=True)
         self.date_execute = datetime.now()
         self.save()
 
