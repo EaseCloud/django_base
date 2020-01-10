@@ -142,13 +142,13 @@ def is_valid_mobile(mobile):
 def get_district_names(district):
     import json
     import os.path
-    area_data = json.load(open(
-        os.path.join(os.path.dirname(__file__), 'data/china-area-data.json')))
+    with open(os.path.join(os.path.dirname(__file__), 'data/china-area-data.json'), 'rb') as f:
+        area_data = json.loads(f.read().decode('utf8'))
     area_map = {}
     for sub in area_data.values():
         area_map.update(sub)
     result = []
-    if not re.match(r'^\d{6}$', district):
+    if not re.match(r'^\d{6}$', str(district)):
         return district
     district = int(district)
     while district and area_map.get((str(district) + "000000")[:6]):
