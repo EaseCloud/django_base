@@ -11,7 +11,7 @@ class AppErrorMiddleware(MiddlewareMixin):
             import traceback
             from sys import stderr
             from django.conf import settings
-            if settings.DEBUG and exception.debug:
+            if exception.debug or settings.API_DEBUG:
                 print(traceback.format_exc(), file=stderr)
             return response_fail(
                 exception.message,
