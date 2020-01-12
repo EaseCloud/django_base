@@ -10,7 +10,7 @@ from django.db import models
 from django.db.models import Q
 from django.db.models.constants import LOOKUP_SEP
 from django.template import loader
-from django.utils import six
+#from django.utils import six
 from django.utils.encoding import force_text
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.compat import coreapi, coreschema, distinct
@@ -198,7 +198,7 @@ class OrderingFilter(BaseFilterBackend):
 
     def get_default_ordering(self, view):
         ordering = getattr(view, 'ordering', None)
-        if isinstance(ordering, six.string_types):
+        if isinstance(ordering, str):
             return (ordering,)
         return ordering
 
@@ -358,7 +358,7 @@ class SearchFilter(BaseFilterBackend):
             return queryset
 
         orm_lookups = [
-            self.construct_search(six.text_type(search_field))
+            self.construct_search(str(search_field))
             for search_field in search_fields
         ]
 
