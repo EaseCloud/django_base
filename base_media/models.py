@@ -143,13 +143,17 @@ class Audio(AbstractAttachment,
 class GalleryModel(models.Model):
     images = models.ManyToManyField(
         verbose_name='图片',
-        to='Image',
+        to='base_media.Image',
         related_name='%(class)ss_attached',
         blank=True,
     )
 
     class Meta:
         abstract = True
+
+    @property
+    def images_url(self):
+        return [img.url() for img in self.images.all()]
 
 
 class Attachment(AbstractAttachment,
