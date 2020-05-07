@@ -98,8 +98,11 @@ class DeepFilterBackend(object):
             if key.startswith('_complex_query'):
                 queryset = queryset.filter(self.parse_complex_query(val))
 
+        if settings.REST_DEEP_DEFAULT_DISTINCT or request.query_params.get('~DISTINCT'):
+            queryset = queryset.distinct()
+
         # 最后要加 distinct 去重
-        return queryset.distinct()
+        return queryset
 
     def get_single_condition_query(self, key, val):
         # 不满足的条件设置为条件短路
